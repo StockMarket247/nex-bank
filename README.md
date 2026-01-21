@@ -1,73 +1,244 @@
-# Welcome to your Lovable project
+# GBH (Global Bank Hub) Banking Platform
 
-## Project info
+A secure, scalable banking platform built with NestJS backend and React frontend.
 
-**URL**: https://lovable.dev/projects/820381fc-e417-4538-80a8-f867bb8c829e
+## 🏗️ Architecture
 
-## How can I edit this code?
+- **Backend**: NestJS + TypeScript + MongoDB + Prisma
+- **Frontend**: React + TypeScript + Vite + shadcn-ui
+- **Authentication**: JWT with Refresh Tokens
+- **Database**: MongoDB
+- **ORM**: Prisma
 
-There are several ways of editing your application.
+## 📁 Project Structure
 
-**Use Lovable**
+```
+global-bank-hub/
+├── backend/          # NestJS backend API
+│   ├── src/
+│   │   ├── auth/     # Authentication module
+│   │   ├── users/    # User management
+│   │   ├── accounts/ # Bank account management
+│   │   ├── transactions/ # Transaction operations
+│   │   ├── transfers/ # External transfer requests
+│   │   ├── admin/    # Admin operations
+│   │   └── audit/    # Audit logging
+│   └── prisma/       # Database schema & migrations
+│
+└── frontend/         # React frontend
+    ├── src/
+    │   ├── pages/
+    │   │   ├── admin/ # Admin dashboard pages
+    │   │   └── client/ # User dashboard pages
+    │   ├── lib/
+    │   │   └── api.ts # API service layer
+    │   └── contexts/  # React contexts
+```
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/820381fc-e417-4538-80a8-f867bb8c829e) and start prompting.
+## 🚀 Quick Start
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js 20+
+- MongoDB (local or remote)
+- npm or yarn
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Backend Setup
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Navigate to backend directory:
+```bash
+cd backend
+```
 
-Follow these steps:
+2. Install dependencies:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. Set up environment variables:
+```bash
+cp .env.example .env
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+Edit `.env` with your configuration:
+```env
+DATABASE_URL="mongodb://localhost:27017/gbh_banking?retryWrites=true&w=majority"
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-in-production
+FRONTEND_URL=http://localhost:8080
+PORT=3000
+```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. Generate Prisma Client:
+```bash
+npm run prisma:generate
+```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+5. Run database migrations:
+```bash
+npm run prisma:migrate
+```
+
+6. Seed the database:
+```bash
+npm run prisma:seed
+```
+
+7. Start the backend:
+```bash
+npm run start:dev
+```
+
+Backend will be available at `http://localhost:3000`
+API Documentation: `http://localhost:3000/api/docs`
+
+### Frontend Setup
+
+1. Navigate to frontend directory:
+```bash
+cd frontend
+```
+
+2. Install dependencies:
+```bash
+npm install
+```
+
+3. Create `.env` file:
+```env
+VITE_API_URL=http://localhost:3000/api/v1
+```
+
+4. Start the frontend:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Frontend will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🐳 Docker Setup
 
-**Use GitHub Codespaces**
+### Using Docker Compose
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+1. Navigate to backend directory:
+```bash
+cd backend
+```
 
-## What technologies are used for this project?
+2. Start all services:
+```bash
+docker-compose up -d
+```
 
-This project is built with:
+3. Run migrations and seed:
+```bash
+docker-compose exec backend npm run prisma:migrate
+docker-compose exec backend npm run prisma:seed
+```
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🔐 Default Admin Credentials
 
-## How can I deploy this project?
+After seeding, you can login with:
 
-Simply open [Lovable](https://lovable.dev/projects/820381fc-e417-4538-80a8-f867bb8c829e) and click on Share -> Publish.
+- **Super Admin**: admin@gbh.com / Admin@123
+- **Admin**: admin2@gbh.com / Admin@123
+- **Auditor**: auditor@gbh.com / Admin@123
 
-## Can I connect a custom domain to my Lovable project?
+⚠️ **Change these passwords in production!**
 
-Yes, you can!
+## ✨ Features
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### User Features
+- User registration & KYC status
+- Login / logout with JWT
+- Profile management
+- Multiple bank accounts (SAVINGS, CURRENT)
+- Internal transfers (GBH → GBH)
+- External transfer requests
+- Transaction history
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+### Admin Features
+- Dashboard with KPIs
+- Approve/reject external transfers
+- User management (suspend, close accounts)
+- Account management (freeze, adjust balance)
+- Transaction explorer
+- Audit logs
+- Role-based access control (SUPER_ADMIN, ADMIN, AUDITOR)
+
+## 🔒 Security Features
+
+- Password hashing with bcrypt
+- JWT authentication with refresh tokens
+- Role-based access control
+- Rate limiting on auth endpoints
+- Input validation
+- CORS configuration
+- Audit logging for all admin actions
+- Ledger-based balance tracking (no floating math errors)
+
+## 📚 API Documentation
+
+Once the backend is running, visit:
+- Swagger UI: `http://localhost:3000/api/docs`
+
+## 🧪 Testing
+
+### Backend Tests
+```bash
+cd backend
+npm run test
+npm run test:e2e
+```
+
+## 📝 Key Endpoints
+
+### Authentication
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/admin/login` - Admin login
+- `POST /api/v1/auth/refresh` - Refresh access token
+
+### Accounts
+- `POST /api/v1/accounts` - Create bank account
+- `GET /api/v1/accounts/me` - Get user accounts
+- `PUT /api/v1/accounts/:id/freeze` - Freeze/unfreeze (Admin)
+
+### Transactions
+- `POST /api/v1/transactions/internal-transfer` - Internal transfer
+- `GET /api/v1/transactions/me` - Get user transactions
+
+### Transfers
+- `POST /api/v1/transfers/external` - Create external transfer request
+- `GET /api/v1/transfers/pending` - Get pending transfers (Admin)
+- `PUT /api/v1/transfers/:requestId/approve` - Approve transfer (Admin)
+- `PUT /api/v1/transfers/:requestId/reject` - Reject transfer (Admin)
+
+### Admin
+- `GET /api/v1/admin/dashboard` - Dashboard stats
+- `PUT /api/v1/admin/users/:userId/suspend` - Suspend user
+- `PUT /api/v1/admin/accounts/:accountId/adjust-balance` - Adjust balance
+
+## 🛠️ Development
+
+### Backend Development
+```bash
+cd backend
+npm run start:dev  # Watch mode
+npm run build      # Build for production
+```
+
+### Frontend Development
+```bash
+cd frontend
+npm run dev        # Development server
+npm run build      # Build for production
+```
+
+## 📄 License
+
+Proprietary - GBH Banking Platform
+
+## 🤝 Contributing
+
+This is a private banking platform. For questions or issues, please contact the development team.

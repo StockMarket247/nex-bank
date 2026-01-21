@@ -1,0 +1,231 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum AccountType {
+  SAVINGS
+  CURRENT
+}
+
+enum TransactionType {
+  INTERNAL_TRANSFER
+  EXTERNAL_TRANSFER
+  DEPOSIT
+  WITHDRAWAL
+  ADJUSTMENT
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
+
+enum TransferRequestStatus {
+  PENDING_ADMIN_APPROVAL
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  AUDITOR
+}
+
+enum AuditAction {
+  USER_CREATED
+  USER_UPDATED
+  USER_SUSPENDED
+  USER_UNSUSPENDED
+  USER_CLOSED
+  ACCOUNT_CREATED
+  ACCOUNT_UPDATED
+  ACCOUNT_FROZEN
+  ACCOUNT_UNFROZEN
+  TRANSFER_APPROVED
+  TRANSFER_REJECTED
+  BALANCE_ADJUSTED
+  LOGIN
+  LOGOUT
+  PASSWORD_RESET
+}
+
+model User {
+  id            String     @id @default(auto()) @map("_id") @db.ObjectId
+  email         String     @unique
+  password      String
+  firstName     String
+  lastName      String
+  phone         String?
+  dateOfBirth   DateTime?
+  address       String?
+  city          String?
+  country       String?
+  postalCode    String?
+  kycStatus     KYCStatus  @default(PENDING)
+  status        UserStatus @default(ACTIVE)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  accounts      BankAccount[]
+  transactions  Transaction[]
+  transferRequests TransferRequest[]
+
+  @@map("users")
+}
+
+model BankAccount {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  accountNumber String    @unique
+  userId        String    @db.ObjectId
+  type          AccountType
+  balance       String    @default("0")
+  currency      String    @default("USD")
+  isFrozen      Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions  Transaction[]
+  transferRequests TransferRequest[]
+
+  @@index([userId])
+  @@map("bank_accounts")
+}
+
+model Transaction {
+  id              String          @id @default(auto()) @map("_id") @db.ObjectId
+  transactionId   String          @unique
+  userId          String          @db.ObjectId
+  accountId       String          @db.ObjectId
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  amount          String
+  currency        String          @default("USD")
+  reference       String?
+  description     String?
+  
+  // For transfers
+  recipientAccountId String?      @db.ObjectId
+  recipientAccountNumber String?
+  recipientName    String?
+  
+  // For external transfers
+  transferRequestId String?       @db.ObjectId
+  
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  user            User            @relation(fields: [userId], references: [id])
+  account         BankAccount     @relation(fields: [accountId], references: [id])
+  transferRequest TransferRequest? @relation(fields: [transferRequestId], references: [id])
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([createdAt])
+  @@map("transactions")
+}
+
+model TransferRequest {
+  id                    String                @id @default(auto()) @map("_id") @db.ObjectId
+  requestId             String                @unique
+  userId                String                @db.ObjectId
+  accountId             String                @db.ObjectId
+  status                TransferRequestStatus  @default(PENDING_ADMIN_APPROVAL)
+  amount                String
+  currency              String                @default("USD")
+  
+  // External bank details
+  recipientBankName     String
+  recipientBankCode     String
+  recipientAccountNumber String
+  recipientName         String
+  recipientEmail        String?
+  recipientPhone        String?
+  
+  reference             String?
+  description           String?
+  
+  // Admin processing
+  approvedBy            String?               @db.ObjectId
+  approvedAt            DateTime?
+  rejectionReason       String?
+  
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  user                  User                  @relation(fields: [userId], references: [id])
+  account               BankAccount           @relation(fields: [accountId], references: [id])
+  transactions          Transaction[]
+  approver              Admin?                @relation(fields: [approvedBy], references: [id])
+
+  @@index([userId])
+  @@index([accountId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("transfer_requests")
+}
+
+model Admin {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  email         String    @unique
+  password      String
+  firstName     String
+  lastName      String
+  role          AdminRole @default(ADMIN)
+  isActive      Boolean   @default(true)
+  lastLoginAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  approvedTransfers TransferRequest[]
+  auditLogs     AuditLog[]
+
+  @@map("admins")
+}
+
+model AuditLog {
+  id            String      @id @default(auto()) @map("_id") @db.ObjectId
+  action        AuditAction
+  entityType    String      // e.g., "User", "Account", "Transaction"
+  entityId      String      @db.ObjectId
+  adminId       String?     @db.ObjectId
+  userId        String?     @db.ObjectId
+  details       String?     // JSON string with additional details
+  ipAddress     String?
+  userAgent     String?
+  createdAt     DateTime    @default(now())
+
+  admin         Admin?      @relation(fields: [adminId], references: [id])
+
+  @@index([action])
+  @@index([entityType, entityId])
+  @@index([adminId])
+  @@index([userId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+

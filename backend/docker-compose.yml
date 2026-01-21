@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: gbh-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: gbh_banking
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - gbh-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gbh-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: mongodb://mongodb:27017/gbh_banking?retryWrites=true&w=majority
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-15m}
+      JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-your-super-secret-refresh-key-change-in-production}
+      JWT_REFRESH_EXPIRES_IN: ${JWT_REFRESH_EXPIRES_IN:-7d}
+      PORT: 3000
+      NODE_ENV: ${NODE_ENV:-production}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:8080}
+    depends_on:
+      - mongodb
+    networks:
+      - gbh-network
+    volumes:
+      - ./prisma:/app/prisma
+
+volumes:
+  mongodb_data:
+
+networks:
+  gbh-network:
+    driver: bridge
+
