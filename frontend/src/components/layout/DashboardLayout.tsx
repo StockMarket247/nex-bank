@@ -21,6 +21,7 @@ import {
   Shield,
   TrendingUp,
   Menu,
+  MessageCircle,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -48,6 +49,7 @@ export const DashboardLayout = () => {
     { name: t('dashboard:notifications'), href: '/dashboard/notifications', icon: Bell },
     { name: t('dashboard:profile'), href: '/dashboard/profile', icon: User },
     { name: 'Security', href: '/dashboard/security', icon: Shield },
+    { name: 'Support', href: '/dashboard/support', icon: MessageCircle },
   ];
 
   const adminNavigation = [
@@ -60,6 +62,7 @@ export const DashboardLayout = () => {
     { name: 'Verifications', href: '/admin/verifications', icon: Shield },
     { name: 'Notifications', href: '/admin/notifications', icon: Bell },
     { name: 'Audit Logs', href: '/admin/audit', icon: Shield },
+    { name: 'Support', href: '/admin/support', icon: MessageCircle },
   ];
 
   const navigation = user?.type === 'admin' ? adminNavigation : clientNavigation;

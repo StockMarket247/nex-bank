@@ -309,6 +309,28 @@ export const api = {
     }),
   },
 
+  // Support (live chat)
+  support: {
+    getMyChat: () => request('/support/me'),
+    startChat: () => request('/support/me/start', { method: 'POST' }),
+    sendMessage: (content: string) =>
+      request('/support/me/messages', {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      }),
+    endMyChat: () => request('/support/me/end', { method: 'POST' }),
+    // Admin
+    listChats: () => request('/support/chats'),
+    getChat: (id: string) => request(`/support/chats/${id}`),
+    sendAdminMessage: (chatId: string, content: string) =>
+      request(`/support/chats/${chatId}/messages`, {
+        method: 'POST',
+        body: JSON.stringify({ content }),
+      }),
+    endChat: (chatId: string) =>
+      request(`/support/chats/${chatId}/end`, { method: 'POST' }),
+  },
+
   // Audit
   audit: {
     getLogs: (params?: { page?: number; limit?: number; action?: string; entityType?: string }) => {

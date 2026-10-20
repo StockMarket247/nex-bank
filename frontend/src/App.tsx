@@ -25,6 +25,7 @@ import Transactions from "./pages/client/Transactions";
 import Notifications from "./pages/client/Notifications";
 import Profile from "./pages/client/Profile";
 import Security from "./pages/client/Security";
+import Support from "./pages/client/Support";
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminTransfers from "./pages/admin/AdminTransfers";
 import PendingTransfers from "./pages/admin/PendingTransfers";
@@ -34,6 +35,7 @@ import TransactionExplorer from "./pages/admin/TransactionExplorer";
 import AuditLogs from "./pages/admin/AuditLogs";
 import AdminNotifications from "./pages/admin/Notifications";
 import VerificationManagement from "./pages/admin/VerificationManagement";
+import AdminSupport from "./pages/admin/Support";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -89,6 +91,7 @@ const App = () => (
                 <Route path="notifications" element={<Notifications />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="security" element={<Security />} />
+                <Route path="support" element={<Support />} />
               </Route>
               
               <Route path="/admin" element={<ProtectedRoute adminOnly><DashboardLayout /></ProtectedRoute>}>
@@ -101,6 +104,7 @@ const App = () => (
                 <Route path="notifications" element={<AdminNotifications />} />
                 <Route path="audit" element={<AuditLogs />} />
                 <Route path="verifications" element={<VerificationManagement />} />
+                <Route path="support" element={<AdminSupport />} />
               </Route>
               
               <Route path="*" element={<NotFound />} />
